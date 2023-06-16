@@ -1,16 +1,16 @@
 package frames;
 
+import listener.PasswordFieldKeyListener;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class WelcomeFrame extends JFrame {
-    private final JPanel welcomePanel;
-    private final JLabel usernameLabel, passwordLabel;
     private final JTextField usernameTextField;
     private final JPasswordField passwordField;
 
     public WelcomeFrame() throws HeadlessException {
-        super("Welcome");
+        super("Login Page");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setSize(300, 200);
         this.setLocationRelativeTo(null); //centers this frame
@@ -20,14 +20,14 @@ public class WelcomeFrame extends JFrame {
             exception.printStackTrace();
         }
 
-        welcomePanel = new JPanel();
+        JPanel welcomePanel = new JPanel();
         welcomePanel.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0; //first column
         gbc.gridy = 0; //first row
         gbc.insets = new Insets(5, 5, 5, 5); // Set insets for spacing
 
-        usernameLabel = new JLabel("Username:");
+        JLabel usernameLabel = new JLabel("Username:");
         gbc.anchor = GridBagConstraints.WEST;
         welcomePanel.add(usernameLabel, gbc);
 
@@ -37,14 +37,15 @@ public class WelcomeFrame extends JFrame {
 
         gbc.gridx = 0;//first column
         gbc.gridy = 1; //second row
-        passwordLabel = new JLabel("Password: ");
+        JLabel passwordLabel = new JLabel("Password: ");
         welcomePanel.add(passwordLabel, gbc);
 
         gbc.gridx = 1; //second column
         passwordField = new JPasswordField(15);
+        JButton loginButton = new JButton("Login");
+        passwordField.addKeyListener(new PasswordFieldKeyListener(loginButton));
         welcomePanel.add(passwordField, gbc);
 
-        JButton loginButton = new JButton("Login");
         loginButton.setPreferredSize(new Dimension(100, 30)); // Set preferred size for the login button
 
         //listener

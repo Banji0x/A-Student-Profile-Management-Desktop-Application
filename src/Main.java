@@ -1,5 +1,3 @@
-import frames.ApplicationFrame;
-import frames.ConfirmationFrame;
 import frames.WelcomeFrame;
 
 public class Main {

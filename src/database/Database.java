@@ -6,7 +6,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class Database {
-    public static void connectToDb() {
+    private boolean connected;
+
+    public void connect() {
         String url = "jdbc:oracle:thin:@localhost:1521:xe";
         String username = "your_username";
         String password = "your_password";
@@ -14,19 +16,22 @@ public class Database {
         try {
             Connection connection = DriverManager.getConnection(url, username, password);
             connection.setAutoCommit(false);
-            System.out.println("Connected to the database.");
+            connected = true;
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
 
-    public void save() {
-
+    public boolean save() {
+        return false;
     }
 
-    public void saveAll() {
-
+    public boolean saveAll() {
+        return false;
     }
 
+    public boolean isConnected() {
+        return connected;
+    }
 }
