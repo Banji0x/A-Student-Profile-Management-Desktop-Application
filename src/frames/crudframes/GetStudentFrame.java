@@ -7,6 +7,7 @@ import model.Student;
 import validator.Validator;
 
 import javax.swing.*;
+import javax.swing.text.PlainDocument;
 import java.awt.*;
 import java.util.List;
 
@@ -15,14 +16,20 @@ import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS;
 
 public class GetStudentFrame extends JFrame {
     private FetchStudentDto studentDto;
+    private String matricNumber;
 
     public static void FetchAllStudents() { //fetches all students
         new GetStudentFrame();
     }
 
-    public static void FetchStudent(FetchStudentDto studentDto) { //fetches only a single student
+    public static void FetchStudentByName(FetchStudentDto studentDto) { //fetches only a single student
         GetStudentFrame studentFrame = new GetStudentFrame();
         studentFrame.studentDto = studentDto;
+    }
+
+    public static void FetchStudentByMatricNumber(String matricNumber) {
+        GetStudentFrame studentFrame = new GetStudentFrame();
+        studentFrame.matricNumber = matricNumber;
     }
 
     private GetStudentFrame() throws HeadlessException {
@@ -42,10 +49,9 @@ public class GetStudentFrame extends JFrame {
         studentPanel.setLayout(new BorderLayout());
 
         List<Student> students;
-        if (studentDto != null)
-            students = database.getStudent(studentDto.firstName(), studentDto.lastName());
-        else
-            students = database.getListOfStudents();
+        if (studentDto != null) students = database.getStudentByName(studentDto.firstName(), studentDto.lastName());
+        else if (matricNumber != null) students = database.getStudentByMatricNumber(matricNumber);
+        else students = database.getListOfStudents();
 
         JTable table = createTable(students);
         JScrollPane jScrollPane = new JScrollPane(table);
@@ -76,9 +82,9 @@ public class GetStudentFrame extends JFrame {
         return table;
     }
 
-    public static class FetchStudentByDetailsFrame extends JFrame {
+    public static class FetchStudentByNameFrame extends JFrame {
 
-        public FetchStudentByDetailsFrame() {
+        public FetchStudentByNameFrame() {
             super("Get Student");
             try {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -92,6 +98,9 @@ public class GetStudentFrame extends JFrame {
             JLabel lastNameLabel = new JLabel("Last name: ");
             JTextField firstNameTextField = new JTextField(15);
             JTextField lastNameTextField = new JTextField(15);
+
+            ((PlainDocument) firstNameTextField.getDocument()).setDocumentFilter(Validator.textValidator());
+            ((PlainDocument) lastNameTextField.getDocument()).setDocumentFilter(Validator.textValidator());
 
             var studentPanel = new JPanel(new GridBagLayout());
             GridBagConstraints gbc = new GridBagConstraints();
@@ -133,9 +142,70 @@ public class GetStudentFrame extends JFrame {
                 }
                 var studentDto = new FetchStudentDto(firstNameTextField.getText().trim(), lastNameTextField.getText().trim());
                 dispose();
-                GetStudentFrame.FetchStudent(studentDto);
+                GetStudentFrame.FetchStudentByName(studentDto);
             });
 //            pack();
+            setVisible(true);
+        }
+
+
+    }
+
+    public static class FetchStudentByMatricFrame extends JFrame {
+        public FetchStudentByMatricFrame() throws HeadlessException {
+            super("Get Student");
+            try {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            setDefaultCloseOperation(EXIT_ON_CLOSE);
+            setSize(300, 130);
+            setLocationRelativeTo(null);
+            var studentPanel = new JPanel(new GridBagLayout());
+            var gbc = new GridBagConstraints();
+//            gbc.anchor = GridBagConstraints.NORTH;
+            gbc.insets = new Insets(5, 5, 5, 5);
+            var matricNumberLabel = new JLabel("Matric Number: ");
+            var matricNumberTextField = new JTextField(10);
+            var submitButton = new JButton("Submit");
+            gbc.gridx = 0;
+            gbc.gridy = 0;
+            studentPanel.add(matricNumberLabel, gbc);
+            gbc.gridx = 1;
+            gbc.gridy = 0;
+            studentPanel.add(matricNumberTextField, gbc);
+            gbc.gridwidth = 2;
+            gbc.gridy = 1;
+            gbc.gridx = 0;
+            studentPanel.add(submitButton, gbc);
+            this.add(studentPanel, CENTER);
+
+            matricNumberTextField.addKeyListener(new TextFieldKeyListener(submitButton)); //for ease
+
+
+            submitButton.addActionListener(actionPerformed -> {
+                //validation
+                Object[] objects = new Validator.BlankFieldsValidator().validate(new JTextField[]{matricNumberTextField});
+                var isBlank = (boolean) objects[0];
+                var blankField = (JTextField) objects[1];
+                if (isBlank) {
+                    JOptionPane.showMessageDialog(this, "Field cannot be blank !!!");
+                    blankField.requestFocus(); // Set focus back to the component
+                    return;
+                }
+
+                boolean valid = new Validator.MatricNumberValidator().validate(matricNumberTextField.getText().trim());
+                if (!valid) {
+                    JOptionPane.showMessageDialog(this, "Matric number is not valid !!!");
+                    matricNumberTextField.requestFocus(); // Set focus back to the component
+                    return;
+                }
+                //end of validation
+                dispose();
+                GetStudentFrame.FetchStudentByMatricNumber(submitButton.getText().trim());
+            });
+
             setVisible(true);
         }
     }

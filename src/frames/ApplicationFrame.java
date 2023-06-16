@@ -33,13 +33,16 @@ public class ApplicationFrame extends JFrame {
 
         var getAllButton = new JButton("Fetch Student");
         getAllButton.addActionListener(actionEvent -> {
-            String[] options = {"Fetch a Student", "Fetch all Students"};
+            String[] options = {"Fetch Student By First and Last Name", "Fetch student by matric number", "Fetch all Students"};
             int optionPicked = JOptionPane
                     .showOptionDialog(this, "Please select an option", "Option Dialog", DEFAULT_OPTION, PLAIN_MESSAGE, null, options, null);
             if (optionPicked == 0) {
                 dispose();
-                new GetStudentFrame.FetchStudentByDetailsFrame();
+                new GetStudentFrame.FetchStudentByNameFrame();
             } else if (optionPicked == 1) {
+                dispose();
+                new GetStudentFrame.FetchStudentByMatricFrame();
+            } else if (optionPicked == 2) {
                 dispose();
                 GetStudentFrame.FetchAllStudents();
             }
