@@ -7,6 +7,8 @@ import javax.swing.*;
 import javax.swing.text.PlainDocument;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.SOUTH;
@@ -86,8 +88,24 @@ public class AddStudentFrame extends JFrame {
         var confirmButton = new JButton("Confirm");
         confirmButton.addActionListener(actionPerformed -> {
             //you still have to implement a button that
+            boolean anyMatch;
+            AtomicReference<JTextField> blankField = new AtomicReference<>();
+            anyMatch = listOfTextFields.stream().anyMatch(jTextFields -> Arrays
+                    .stream(jTextFields)
+                    .anyMatch(field -> {
+                        if (field.getText().isEmpty() || field.getText().isBlank()) {
+                            blankField.set(field);
+                            return true;
+                        }
+                        return false;
+                    }));
+            if (anyMatch) {
+                JOptionPane.showMessageDialog(this, "Field cannot be blank !!!");
+                blankField.get().requestFocus(); // Set focus back to the component
+                return;
+            }
             setVisible(false);
-            new ConfirmationFrame(listOfTextFields,this);
+            new ConfirmationFrame(listOfTextFields, this);
         });
 
         JPanel buttonPanel = new JPanel();

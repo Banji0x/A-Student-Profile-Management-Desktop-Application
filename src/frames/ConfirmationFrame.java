@@ -2,10 +2,15 @@ package frames;
 
 import database.Database;
 import frames.crudframes.AddStudentFrame;
+import model.Student;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.List;
+
+import static javax.swing.JOptionPane.DEFAULT_OPTION;
+import static javax.swing.JOptionPane.PLAIN_MESSAGE;
 
 
 public class ConfirmationFrame extends JFrame {
@@ -13,6 +18,7 @@ public class ConfirmationFrame extends JFrame {
 
     public ConfirmationFrame(ArrayList<JTextField[]> list, AddStudentFrame studentFrame) throws HeadlessException {
         super("Confirmation Page");
+        database = new Database();
         setSize(500, 400);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -40,17 +46,32 @@ public class ConfirmationFrame extends JFrame {
                     return;
                 }
             }
-            boolean success = database.saveAll(/* data will be passed in here*/);
+
+            List<Student> studentList = list
+                    .stream()
+                    .map(textFieldArray -> new Student(textFieldArray[0].getText().trim(),
+                            textFieldArray[1].getText().trim(),
+                            textFieldArray[2].getText().trim(),
+                            textFieldArray[3].getText().trim(),
+                            textFieldArray[4].getText().trim(),
+                            textFieldArray[5].getText().trim()))
+                    .toList();
+
+            boolean success = database.saveAll(studentList);
             if (!success) {
-                boolean saved = database.saveAll(/* data will be passed in here*/);//try to save it again
+                boolean saved = database.saveAll(studentList);//try to save it again
                 if (!saved) {
                     JOptionPane.showMessageDialog(this, "An error occurred while persisting to database.Kindly try again");
                     return;
                 }
             }
             studentFrame.dispose();
-            JOptionPane.showMessageDialog(this, "Student's data inputted were persisted successfully.");
+            String[] options = {"Proceed to Home", "Exit Application"};
+            int optionPicked = JOptionPane
+                    .showOptionDialog(this, "Student's data was persisted successfully. Kindly choose an option", "Action Dialog", DEFAULT_OPTION, PLAIN_MESSAGE, null, options, null);
             dispose();
+            if (optionPicked == 0)
+                new ApplicationFrame();
         });
 
         JButton editButton = new JButton("Edit");
