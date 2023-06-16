@@ -21,7 +21,7 @@ public class ConfirmationFrame extends JFrame {
         } catch (Exception exception) {
             exception.printStackTrace();
         }
-//        database.connect();
+        database.connect();
         JPanel confirmationPanel = new JPanel(new BorderLayout());
 
         JTable table = createTable(list);
@@ -83,7 +83,6 @@ public class ConfirmationFrame extends JFrame {
 
         JTable table = new JTable(rowData, columnHeaders);
         table.setPreferredScrollableViewportSize(new Dimension(500, 400));
-
         return table;
     }
 }

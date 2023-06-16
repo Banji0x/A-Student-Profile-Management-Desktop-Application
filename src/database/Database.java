@@ -1,9 +1,12 @@
 package database;
 
 
+import model.Student;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.List;
 
 public class Database {
     private boolean connected;
@@ -33,5 +36,13 @@ public class Database {
 
     public boolean isConnected() {
         return connected;
+    }
+
+    public List<Student> getStudent(String firstName, String lastName) {
+        return null; //returns a list bc it's possible more than 2 students bears the same first and last name.
+    }
+
+    public List<Student> getListOfStudents() {
+        return null;
     }
 }

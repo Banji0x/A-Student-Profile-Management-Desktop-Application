@@ -1,6 +1,6 @@
 package frames;
 
-import listener.PasswordFieldKeyListener;
+import listener.TextFieldKeyListener;
 
 import javax.swing.*;
 import java.awt.*;
@@ -43,7 +43,7 @@ public class WelcomeFrame extends JFrame {
         gbc.gridx = 1; //second column
         passwordField = new JPasswordField(15);
         JButton loginButton = new JButton("Login");
-        passwordField.addKeyListener(new PasswordFieldKeyListener(loginButton));
+        passwordField.addKeyListener(new TextFieldKeyListener(loginButton));
         welcomePanel.add(passwordField, gbc);
 
         loginButton.setPreferredSize(new Dimension(100, 30)); // Set preferred size for the login button
@@ -57,8 +57,8 @@ public class WelcomeFrame extends JFrame {
                 JOptionPane.showMessageDialog(this, "Invalid username or password. Please try again.");
         });
 
-        gbc.gridx = 0; //first column
         gbc.gridy = 2; //third row
+        gbc.gridx = 0; //first column
         gbc.gridwidth = 2; //sets the
         gbc.anchor = GridBagConstraints.CENTER;
         gbc.insets = new Insets(10, 5, 5, 5);

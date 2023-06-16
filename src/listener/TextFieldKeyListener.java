@@ -4,11 +4,11 @@ import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-public class PasswordFieldKeyListener implements KeyListener {
+public class TextFieldKeyListener implements KeyListener {
 
     private final JButton loginButton;
 
-    public PasswordFieldKeyListener(JButton loginButton) {
+    public TextFieldKeyListener(JButton loginButton) {
         this.loginButton = loginButton;
     }
 
