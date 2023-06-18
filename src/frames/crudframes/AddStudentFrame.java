@@ -1,6 +1,8 @@
 package frames.crudframes;
 
+import frames.ApplicationFrame;
 import frames.ConfirmationFrame;
+import model.StudentDto;
 import validator.Validator;
 
 import javax.swing.*;
@@ -8,6 +10,7 @@ import javax.swing.text.PlainDocument;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.awt.BorderLayout.CENTER;
@@ -16,16 +19,21 @@ import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS;
 
 public class AddStudentFrame extends JFrame {
     private final JLabel firstNameLabel, lastNameLabel, ageLabel, matricNumberLabel, departmentLabel, facultyLabel;
-    private ArrayList<JTextField[]> listOfTextFields;
+    protected final JButton homeButton, addButton, exitButton, submitButton;
+    private List<JTextField[]> listOfTextFields;
+    protected List<JTextField> matricNumberTextFieldsList;
+    protected boolean validationIssueExists = false;
     private int rowCount, labelXAxis;
 
     private final JPanel studentPanel;
+    protected ArrayList<StudentDto> firstAndLastNameTextFieldsList;
 
     public AddStudentFrame() throws HeadlessException {
-        super("Add Student Page");
+        super("Add Student Details");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(850, 500);
         setLocationRelativeTo(null); //centers it
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception exception) {
@@ -55,7 +63,7 @@ public class AddStudentFrame extends JFrame {
         JScrollPane scrollPane = new JScrollPane(studentPanel);//make the panel scrollable
         scrollPane.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_ALWAYS);
 
-        JButton addButton = new JButton("Add");
+        addButton = new JButton("Add");
         addButton.addActionListener(actionPerformed -> {
             var fields = listOfTextFields.get(listOfTextFields.size() - 1);
             var firstNameTextField = fields[0];
@@ -84,13 +92,25 @@ public class AddStudentFrame extends JFrame {
             pack(); //to automatically resize...
         });
 
+        homeButton = new JButton("Proceed to Home");
+        exitButton = new JButton("Exit application");
+        //listeners
+        homeButton.addActionListener(actionPerformed -> {
+            dispose();
+            new ApplicationFrame();
+        });
 
-        var confirmButton = new JButton("Confirm");
-        confirmButton.addActionListener(actionPerformed -> {
-            //you still have to implement a button that
-            boolean anyMatch;
+        exitButton.addActionListener(actionPerformed -> {
+            dispose();
+        });
+
+        submitButton = new JButton("Submit"); //initialized the submit button to the protected instance variable
+        //this listener performs validation
+        submitButton.addActionListener(actionPerformed -> {
+            //you still have to implement a button //done
+            boolean fieldIsBlank;
             AtomicReference<JTextField> blankField = new AtomicReference<>();
-            anyMatch = listOfTextFields.stream().anyMatch(jTextFields -> Arrays
+            fieldIsBlank = listOfTextFields.stream().anyMatch(jTextFields -> Arrays
                     .stream(jTextFields)
                     .anyMatch(field -> {
                         if (field.getText().isEmpty() || field.getText().isBlank()) {
@@ -99,18 +119,25 @@ public class AddStudentFrame extends JFrame {
                         }
                         return false;
                     }));
-            if (anyMatch) {
-                JOptionPane.showMessageDialog(this, "Field cannot be blank !!!");
-                blankField.get().requestFocus(); // Set focus back to the component
-                return;
+            if (!validationIssueExists) { //this means a validator was invoked and didn't find any issues...
+                if (fieldIsBlank) { //the blank field validator result
+                    validationIssueExists = true;
+                    JOptionPane.showMessageDialog(this, "Field cannot be blank !!!");
+                    blankField.get().requestFocus(); // Set focus back to the component
+                } else
+                    validationIssueExists = false;
             }
-            setVisible(false);
-            new ConfirmationFrame(listOfTextFields, this);
+            if (!validationIssueExists) { //this means the matric number validator and blank field validator had no issues...
+                setVisible(false);
+                new ConfirmationFrame(listOfTextFields, this);
+            }
         });
-
+        //
         JPanel buttonPanel = new JPanel();
+        buttonPanel.add(homeButton);
         buttonPanel.add(addButton);
-        buttonPanel.add(confirmButton);
+        buttonPanel.add(submitButton);
+        buttonPanel.add(exitButton);
 
         this.add(scrollPane, CENTER);
         this.add(buttonPanel, SOUTH);
@@ -118,6 +145,9 @@ public class AddStudentFrame extends JFrame {
         pack();
     }
 
+//    public static AddStudentFrame updateStudentFrame() {
+//        return new AddStudentFrame();
+//    }
 
     private void addStudentLabels() {
         GridBagConstraints gbc = new GridBagConstraints();
@@ -165,7 +195,16 @@ public class AddStudentFrame extends JFrame {
                 .setDocumentFilter(Validator.textValidator());
         ((PlainDocument) facultyTextField.getDocument())
                 .setDocumentFilter(Validator.textValidator());
+        //
 
+        // this block of code right here is for subclasses
+        //list of matric number textField
+        matricNumberTextFieldsList = new ArrayList<>();
+        matricNumberTextFieldsList.add(matricNumberTextField);
+        //list of first and last name textField
+        firstAndLastNameTextFieldsList = new ArrayList<>();
+        firstAndLastNameTextFieldsList.add(new StudentDto(firstNameTextField, lastNameTextField));
+        //
         //alignment
         gbc.gridy = rowCount;
         studentPanel.add(firstNameTextField, gbc);

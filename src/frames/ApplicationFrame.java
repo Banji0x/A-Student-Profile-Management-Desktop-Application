@@ -1,7 +1,9 @@
 package frames;
 
+import frames.crudframes.AbstractDeleteStudentFrame;
 import frames.crudframes.AddStudentFrame;
 import frames.crudframes.GetStudentFrame;
+import frames.crudframes.UpdateStudentFrame;
 
 import javax.swing.*;
 import java.awt.*;
@@ -34,8 +36,7 @@ public class ApplicationFrame extends JFrame {
         var getAllButton = new JButton("Fetch Student");
         getAllButton.addActionListener(actionEvent -> {
             String[] options = {"Fetch Student By First and Last Name", "Fetch student by matric number", "Fetch all Students"};
-            int optionPicked = JOptionPane
-                    .showOptionDialog(this, "Please select an option", "Option Dialog", DEFAULT_OPTION, PLAIN_MESSAGE, null, options, null);
+            int optionPicked = JOptionPane.showOptionDialog(this, "Please select an option", "Option Dialog", DEFAULT_OPTION, PLAIN_MESSAGE, null, options, null);
             if (optionPicked == 0) {
                 dispose();
                 new GetStudentFrame.FetchStudentByNameFrame();
@@ -50,12 +51,29 @@ public class ApplicationFrame extends JFrame {
 
         var updateButton = new JButton("Update Student");
         updateButton.addActionListener(actionEvent -> {
-            //update functionality
+            String[] options = {"Update by first name and last name", "Update by matric number"};
+            int optionPicked = JOptionPane.showOptionDialog(this, "Please select an option", "Update Option Dialog", DEFAULT_OPTION, PLAIN_MESSAGE, null, options, null);
+            if (optionPicked == 0) {
+                dispose();
+                new UpdateStudentFrame.UpdateStudentFrameByFullName();
+            } else if (optionPicked == 1) {
+                dispose();
+                new UpdateStudentFrame.UpdateStudentFrameByMatricNumber();
+            }
         });
 
         var deleteButton = new JButton("Delete Student");
         deleteButton.addActionListener(actionEvent -> {
             //delete functionality
+            String[] options = {"Delete by matric number", "Delete by first name and last name"};
+            int optionPicked = JOptionPane.showOptionDialog(this, "Please select an option", "Delete Option Dialog", DEFAULT_OPTION, PLAIN_MESSAGE, null, options, null);
+            if (optionPicked == 0) {
+                dispose();
+                new AbstractDeleteStudentFrame.DeleteStudentByName();
+            } else if (optionPicked == 1) {
+                dispose();
+                new AbstractDeleteStudentFrame.DeleteStudentByMatricNumber();
+            }
         });
 
         var buttonPanel = new JPanel();

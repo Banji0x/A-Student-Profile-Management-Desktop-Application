@@ -1,28 +1,28 @@
 package frames.crudframes;
 
 import database.Database;
-import listener.TextFieldKeyListener;
-import model.FetchStudentDto;
+import frames.ApplicationFrame;
 import model.Student;
+import model.StudentDto;
 import validator.Validator;
 
 import javax.swing.*;
-import javax.swing.text.PlainDocument;
 import java.awt.*;
 import java.util.List;
 
 import static java.awt.BorderLayout.CENTER;
+import static java.awt.BorderLayout.SOUTH;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS;
 
 public class GetStudentFrame extends JFrame {
-    private FetchStudentDto studentDto;
+    private StudentDto studentDto;
     private String matricNumber;
 
     public static void FetchAllStudents() { //fetches all students
         new GetStudentFrame();
     }
 
-    public static void FetchStudentByName(FetchStudentDto studentDto) { //fetches only a single student
+    public static void FetchStudentByName(StudentDto studentDto) { //fetches only a single student
         GetStudentFrame studentFrame = new GetStudentFrame();
         studentFrame.studentDto = studentDto;
     }
@@ -33,7 +33,7 @@ public class GetStudentFrame extends JFrame {
     }
 
     private GetStudentFrame() throws HeadlessException {
-        super("Fetch Student");
+        super("Fetch Student Details");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(700, 400);
         setLocationRelativeTo(null); //centers it
@@ -49,7 +49,8 @@ public class GetStudentFrame extends JFrame {
         studentPanel.setLayout(new BorderLayout());
 
         List<Student> students;
-        if (studentDto != null) students = database.getStudentByName(studentDto.firstName(), studentDto.lastName());
+        if (studentDto != null)
+            students = database.getStudentByName(studentDto.firstNameTextField().getText().trim(), studentDto.lastNameTextField().getText().trim());
         else if (matricNumber != null) students = database.getStudentByMatricNumber(matricNumber);
         else students = database.getListOfStudents();
 
@@ -58,6 +59,22 @@ public class GetStudentFrame extends JFrame {
         jScrollPane.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_ALWAYS);
 
         studentPanel.add(jScrollPane, CENTER);
+        var buttonPanel = new JPanel();
+        var homeButton = new JButton("Proceed to Home");
+        var exitButton = new JButton("Exit application");
+        //listeners
+        homeButton.addActionListener(actionPerformed -> {
+            dispose();
+            new ApplicationFrame();
+        });
+
+        exitButton.addActionListener(actionPerformed -> {
+            dispose();
+        });
+        //
+        buttonPanel.add(homeButton);
+        buttonPanel.add(exitButton);
+        studentPanel.add(buttonPanel, SOUTH);
         this.add(studentPanel);
         setVisible(true);
     }
@@ -82,53 +99,53 @@ public class GetStudentFrame extends JFrame {
         return table;
     }
 
-    public static class FetchStudentByNameFrame extends JFrame {
+    public static class FetchStudentByNameFrame extends AbstractStudentByNameFrame {
 
         public FetchStudentByNameFrame() {
-            super("Get Student");
+            super("Get Student By Name");
             try {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            setDefaultCloseOperation(EXIT_ON_CLOSE);
             setSize(300, 230);
             setLocationRelativeTo(null);
-            JLabel firstNameLabel = new JLabel("First name: ");
-            JLabel lastNameLabel = new JLabel("Last name: ");
-            JTextField firstNameTextField = new JTextField(15);
-            JTextField lastNameTextField = new JTextField(15);
-
-            ((PlainDocument) firstNameTextField.getDocument()).setDocumentFilter(Validator.textValidator());
-            ((PlainDocument) lastNameTextField.getDocument()).setDocumentFilter(Validator.textValidator());
-
-            var studentPanel = new JPanel(new GridBagLayout());
-            GridBagConstraints gbc = new GridBagConstraints();
-            gbc.anchor = GridBagConstraints.WEST;
-            gbc.insets = new Insets(5, 5, 5, 5);
-
-            gbc.gridy = 0;
-            gbc.gridx = 0;
-            studentPanel.add(firstNameLabel, gbc);
-            gbc.gridx = 1;
-            studentPanel.add(firstNameTextField, gbc);
-            gbc.gridy = 1;
-            gbc.gridx = 0;
-            studentPanel.add(lastNameLabel, gbc);
-            gbc.gridx = 1;
-            studentPanel.add(lastNameTextField, gbc);
-
-            var submitButton = new JButton("Submit");
-            gbc.gridy = 2;
-            gbc.gridwidth = 2;
-            gbc.insets = new Insets(10, 5, 5, 5);
-            submitButton.setPreferredSize(new Dimension(100, 30)); // Set preferred size for the login button
-
-            studentPanel.add(submitButton, gbc);
-            studentPanel.revalidate();
-            studentPanel.repaint();
-
-            lastNameTextField.addKeyListener(new TextFieldKeyListener(submitButton));
+//            JLabel firstNameLabel = new JLabel("First name: ");
+//            JLabel lastNameLabel = new JLabel("Last name: ");
+//            JTextField firstNameTextField = new JTextField(15);
+//            JTextField lastNameTextField = new JTextField(15);
+//
+//            ((PlainDocument) firstNameTextField.getDocument()).setDocumentFilter(Validator.textValidator());
+//            ((PlainDocument) lastNameTextField.getDocument()).setDocumentFilter(Validator.textValidator());
+//
+//            var studentPanel = new JPanel(new GridBagLayout());
+//            GridBagConstraints gbc = new GridBagConstraints();
+//            gbc.anchor = GridBagConstraints.WEST;
+//            gbc.insets = new Insets(5, 5, 5, 5);
+//
+//            gbc.gridy = 0;
+//            gbc.gridx = 0;
+//            studentPanel.add(firstNameLabel, gbc);
+//            gbc.gridx = 1;
+//            studentPanel.add(firstNameTextField, gbc);
+//            gbc.gridy = 1;
+//            gbc.gridx = 0;
+//            studentPanel.add(lastNameLabel, gbc);
+//            gbc.gridx = 1;
+//            studentPanel.add(lastNameTextField, gbc);
+//
+//            var submitButton = new JButton("Submit");
+//            gbc.gridy = 2;
+//            gbc.gridwidth = 2;
+//            gbc.insets = new Insets(10, 5, 5, 5);
+//            submitButton.setPreferredSize(new Dimension(100, 30)); // Set preferred size for the login button
+//
+//            studentPanel.add(submitButton, gbc);
+//            studentPanel.revalidate();
+//            studentPanel.repaint();
+//
+//            lastNameTextField.addKeyListener(new TextFieldKeyListener(submitButton));  ////
+            //these lines of code is redundant because the abstract super class already has it...
             add(studentPanel, CENTER);
 
             submitButton.addActionListener(actionPerformed -> {
@@ -140,7 +157,7 @@ public class GetStudentFrame extends JFrame {
                     blankField.requestFocus(); // Set focus back to the component
                     return;
                 }
-                var studentDto = new FetchStudentDto(firstNameTextField.getText().trim(), lastNameTextField.getText().trim());
+                var studentDto = new StudentDto(firstNameTextField, lastNameTextField);
                 dispose();
                 GetStudentFrame.FetchStudentByName(studentDto);
             });
@@ -151,61 +168,15 @@ public class GetStudentFrame extends JFrame {
 
     }
 
-    public static class FetchStudentByMatricFrame extends JFrame {
+    public static class FetchStudentByMatricFrame extends AbstractStudentByMatricNumberFrame {
         public FetchStudentByMatricFrame() throws HeadlessException {
-            super("Get Student");
-            try {
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            setDefaultCloseOperation(EXIT_ON_CLOSE);
-            setSize(300, 130);
-            setLocationRelativeTo(null);
-            var studentPanel = new JPanel(new GridBagLayout());
-            var gbc = new GridBagConstraints();
-//            gbc.anchor = GridBagConstraints.NORTH;
-            gbc.insets = new Insets(5, 5, 5, 5);
-            var matricNumberLabel = new JLabel("Matric Number: ");
-            var matricNumberTextField = new JTextField(10);
-            var submitButton = new JButton("Submit");
-            gbc.gridx = 0;
-            gbc.gridy = 0;
-            studentPanel.add(matricNumberLabel, gbc);
-            gbc.gridx = 1;
-            gbc.gridy = 0;
-            studentPanel.add(matricNumberTextField, gbc);
-            gbc.gridwidth = 2;
-            gbc.gridy = 1;
-            gbc.gridx = 0;
-            studentPanel.add(submitButton, gbc);
-            this.add(studentPanel, CENTER);
-
-            matricNumberTextField.addKeyListener(new TextFieldKeyListener(submitButton)); //for ease
-
-
+            super("Fetch Student Details");
             submitButton.addActionListener(actionPerformed -> {
-                //validation
-                Object[] objects = new Validator.BlankFieldsValidator().validate(new JTextField[]{matricNumberTextField});
-                var isBlank = (boolean) objects[0];
-                var blankField = (JTextField) objects[1];
-                if (isBlank) {
-                    JOptionPane.showMessageDialog(this, "Field cannot be blank !!!");
-                    blankField.requestFocus(); // Set focus back to the component
-                    return;
+                if (!validationIssues) {
+                    dispose();
+                    GetStudentFrame.FetchStudentByMatricNumber(submitButton.getText().trim());
                 }
-
-                boolean valid = new Validator.MatricNumberValidator().validate(matricNumberTextField.getText().trim());
-                if (!valid) {
-                    JOptionPane.showMessageDialog(this, "Matric number is not valid !!!");
-                    matricNumberTextField.requestFocus(); // Set focus back to the component
-                    return;
-                }
-                //end of validation
-                dispose();
-                GetStudentFrame.FetchStudentByMatricNumber(submitButton.getText().trim());
             });
-
             setVisible(true);
         }
     }

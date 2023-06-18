@@ -6,7 +6,6 @@ import model.Student;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
 
 import static javax.swing.JOptionPane.DEFAULT_OPTION;
@@ -14,12 +13,13 @@ import static javax.swing.JOptionPane.PLAIN_MESSAGE;
 
 
 public class ConfirmationFrame extends JFrame {
+    protected JTable outputTable;
     private Database database;
 
-    public ConfirmationFrame(ArrayList<JTextField[]> list, AddStudentFrame studentFrame) throws HeadlessException {
+    public ConfirmationFrame(List<JTextField[]> list, AddStudentFrame studentFrame) throws HeadlessException {
         super("Confirmation Page");
         database = new Database();
-        setSize(500, 400);
+        setSize(550, 400);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         try {
@@ -30,52 +30,38 @@ public class ConfirmationFrame extends JFrame {
         database.connect();
         JPanel confirmationPanel = new JPanel(new BorderLayout());
 
-        JTable table = createTable(list);
+        outputTable = createTable(list);
+        outputTable.setEnabled(false); //by default it's false...
 
-        JScrollPane scrollPane = new JScrollPane(table);
+        JScrollPane scrollPane = new JScrollPane(outputTable);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
         JButton proceedButton = new JButton("Proceed");
         proceedButton.addActionListener(e -> {
             boolean connected = database.isConnected();
             if (!connected) {
-                database.connect(); //try to connect again
-                boolean connected1 = database.isConnected();
-                if (!connected1) {
-                    JOptionPane.showMessageDialog(this, "There's an error with your network connection.");
-                    return;
-                }
+                JOptionPane.showMessageDialog(this, "There's a problem with your network connection.");
+                return;
             }
 
-            List<Student> studentList = list
-                    .stream()
-                    .map(textFieldArray -> new Student(textFieldArray[0].getText().trim(),
-                            textFieldArray[1].getText().trim(),
-                            textFieldArray[2].getText().trim(),
-                            textFieldArray[3].getText().trim(),
-                            textFieldArray[4].getText().trim(),
-                            textFieldArray[5].getText().trim()))
-                    .toList();
+            List<Student> studentList = list.stream().map(textFieldArray -> new Student(textFieldArray[0].getText().trim(), textFieldArray[1].getText().trim(), textFieldArray[2].getText().trim(), textFieldArray[3].getText().trim(), textFieldArray[4].getText().trim(), textFieldArray[5].getText().trim())).toList();
 
             boolean success = database.saveAll(studentList);
             if (!success) {
-                boolean saved = database.saveAll(studentList);//try to save it again
-                if (!saved) {
-                    JOptionPane.showMessageDialog(this, "An error occurred while persisting to database.Kindly try again");
-                    return;
-                }
+                JOptionPane.showMessageDialog(this, "An error occurred while persisting to database.Kindly try again");
+                return;
             }
             studentFrame.dispose();
             String[] options = {"Proceed to Home", "Exit Application"};
-            int optionPicked = JOptionPane
-                    .showOptionDialog(this, "Student's data was persisted successfully. Kindly choose an option", "Action Dialog", DEFAULT_OPTION, PLAIN_MESSAGE, null, options, null);
+            int optionPicked = JOptionPane.showOptionDialog(this, "Student's data was persisted successfully. Kindly choose an option", "Action Dialog", DEFAULT_OPTION, PLAIN_MESSAGE, null, options, null);
             dispose();
-            if (optionPicked == 0)
-                new ApplicationFrame();
+            if (optionPicked == 0) new ApplicationFrame();
         });
 
         JButton editButton = new JButton("Edit");
-        editButton.addActionListener(e -> {
+        editButton.addActionListener(e ->
+
+        {
             dispose();
             studentFrame.setVisible(true);
         });
@@ -91,7 +77,7 @@ public class ConfirmationFrame extends JFrame {
         setVisible(true);
     }
 
-    private JTable createTable(ArrayList<JTextField[]> list) {
+    private JTable createTable(List<JTextField[]> list) {
         String[] columnHeaders = {"First Name", "Last Name", "Age", "Matric Number", "Department", "Faculty"};
         Object[][] rowData = new Object[list.size()][6];
 
@@ -106,4 +92,13 @@ public class ConfirmationFrame extends JFrame {
         table.setPreferredScrollableViewportSize(new Dimension(500, 400));
         return table;
     }
+
+    public JTable getOutputTable() {
+        return outputTable;
+    }
+
+    public void setOutputTable(JTable outputTable) {
+        this.outputTable = outputTable;
+    }
 }
+
