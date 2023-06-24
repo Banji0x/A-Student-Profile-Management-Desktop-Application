@@ -37,17 +37,13 @@ public class Database {
 
     public boolean save(Student student) {
         boolean connected = connect(frame);
-        if (!connected)
-            return false;
-        return true;
+        return connected;
 //        return false;
     }
 
     public boolean saveAll(List<Student> students) {
         boolean connected = connect(frame);
-        if (!connected)
-            return false;
-        return true;
+        return connected;
 //        return false;
     }
 
@@ -85,42 +81,29 @@ public class Database {
     }
 
     public boolean studentExists(String matricNumber) {
-        if (matricNumber.equals("test001"))
-            return true;
-        return false;
+        return matricNumber.equals("test001");
     }
 
     public boolean studentExists(String firstName, String lastName) {
         if (!connect(frame))
             return false;
-        if (firstName.equals("test") && lastName.equals("password")) {
-            return true;
-        }
-        return false;
+        return firstName.equals("test") && lastName.equals("password");
     }
 
     public boolean deleteStudent(String matricNumber) {
-        if (!connect(frame))
-            return false;
-        return true;
+        return connect(frame);
     }
 
     public boolean deleteStudent(String firstName, String lastName) {
-        if (!connect(frame))
-            return false;
-        return true;
+        return connect(frame);
     }
 
     public boolean updateAll(List<Student> students) {
-        if (!connect(frame))
-            return false;
-        return true;
+        return connect(frame);
     }
 
     public boolean deleteALl(List<Student> students) {
-        if (!connect(frame))
-            return false;
-        return true;
+        return connect(frame);
     }
 
     public boolean adminLogin(String principal, String password) {

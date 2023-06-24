@@ -1,0 +1,11 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="StudentProfileManagementApplication">
+    <output-path>$USER_HOME$/IdeaProjects/StudentProfileManagement/src/jar</output-path>
+    <root id="archive" name="StudentProfileManagementApplication.jar">
+      <element id="module-output" name="StudentProfileManagement" />
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/META-INF/MANIFEST.MF" />
+      </element>
+    </root>
+  </artifact>
+</component>
