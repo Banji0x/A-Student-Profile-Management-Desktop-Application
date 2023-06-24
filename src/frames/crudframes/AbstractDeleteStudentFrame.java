@@ -52,7 +52,7 @@ public abstract class AbstractDeleteStudentFrame extends JFrame {
             return;
         }
         String[] options = {"Proceed to Home", "Exit application"};
-        int optionChosen = JOptionPane.showOptionDialog(frame, "Delete Operation successful.", "Delete Operation Dialog", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, null);
+        int optionChosen = JOptionPane.showOptionDialog(frame, "Delete Operation was successful.", "Delete Operation Dialog", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, null);
         if (optionChosen == 0) {
             frame.dispose();
             new ApplicationFrame();
