@@ -122,4 +122,8 @@ public class Database {
             return false;
         return true;
     }
+
+    public boolean adminLogin(String principal, String password) {
+        return principal.equals("admin") && password.equals("admin#345");
+    }
 }

@@ -1,5 +1,6 @@
 package frames;
 
+import database.Database;
 import listener.TextFieldKeyListener;
 
 import javax.swing.*;
@@ -8,6 +9,7 @@ import java.awt.*;
 public class WelcomeFrame extends JFrame {
     private final JTextField usernameTextField;
     private final JPasswordField passwordField;
+    private final Database database;
 
     public WelcomeFrame() throws HeadlessException {
         super("Login Page");
@@ -67,9 +69,11 @@ public class WelcomeFrame extends JFrame {
         this.add(welcomePanel);
         this.setVisible(true);
 //        pack();
+        database = new Database();
+        database.connect(this);
     }
 
     private boolean validateLogin(String principal, String password) {
-        return principal.equals("admin") && password.equals("admin#345");
+        return database.adminLogin(principal, password);
     }
 }

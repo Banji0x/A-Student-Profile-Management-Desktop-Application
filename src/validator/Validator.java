@@ -25,7 +25,7 @@ public class Validator extends DocumentFilter {
 
     public static boolean matricNumberValidator(JFrame frame, JTextField text) { //returns true if the supplied matric number is valid
         if (text.getText().trim().matches(matricNumberRegex)) return true;
-        if (text.getText().trim().equals("test001"))  // delete this
+        if (text.getText().trim().equals("test001"))  // this should be deleted to utilize the dynamic implementation
             return true;
         Toolkit.getDefaultToolkit().beep();  // Beep to indicate invalid input
         JOptionPane.showMessageDialog(frame, "Matric number format is invalid!!!");
