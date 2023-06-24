@@ -85,6 +85,8 @@ public abstract class AbstractGetStudentFrame extends JFrame {
                 dispose(); //dispose this frame...
                 new GetStudentByFirstAndLastNameFrame(studentList);
             });
+            revalidate();
+            repaint();
             setVisible(true);
         }
 
@@ -95,6 +97,8 @@ public abstract class AbstractGetStudentFrame extends JFrame {
                 JScrollPane jScrollPane = new JScrollPane(table);
                 jScrollPane.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_ALWAYS);
                 studentPanel.add(jScrollPane, CENTER);
+                revalidate();
+                repaint();
                 setVisible(true);
             }
         }
@@ -111,9 +115,10 @@ public abstract class AbstractGetStudentFrame extends JFrame {
                 if (doNotProceed) { //check if the listener found issues...
                     return;
                 }
-                if (!studentExists){
+                if (!studentExists) {
                     return;
                 }
+                dispose();
                 new GetStudentByMatricNumberFrame(matricNumberTextField);
             });
             setVisible(true);

@@ -87,6 +87,6 @@ public abstract class AbstractStudentByFirstAndLastNameFrame extends JFrame {
         add(studentPanel, CENTER);
         lastNameTextField.addKeyListener(new TextFieldKeyListener(submitButton));
         database.connect(this);
-        pack();
+//        pack();
     }
 }
