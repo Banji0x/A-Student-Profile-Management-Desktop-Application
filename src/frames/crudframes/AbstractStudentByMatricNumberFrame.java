@@ -1,5 +1,7 @@
 package frames.crudframes;
 
+import buttons.CustomJButton;
+import database.Database;
 import listener.TextFieldKeyListener;
 import validator.Validator;
 
@@ -9,7 +11,10 @@ import java.awt.*;
 import static java.awt.BorderLayout.CENTER;
 
 public abstract class AbstractStudentByMatricNumberFrame extends JFrame {
-    protected boolean validationIssues;
+    protected boolean studentExists;
+    protected Database database;
+    protected JTextField matricNumberTextField;
+    protected boolean doNotProceed;
     protected JButton submitButton;
 
     public AbstractStudentByMatricNumberFrame(String title) throws HeadlessException {
@@ -27,8 +32,9 @@ public abstract class AbstractStudentByMatricNumberFrame extends JFrame {
 //            gbc.anchor = GridBagConstraints.NORTH;
         gbc.insets = new Insets(5, 5, 5, 5);
         var matricNumberLabel = new JLabel("Matric Number: ");
-        var matricNumberTextField = new JTextField(10);
-        submitButton = new JButton("Submit");
+        matricNumberTextField = new JTextField(10);
+        submitButton = new CustomJButton("Submit");
+
         gbc.gridx = 0;
         gbc.gridy = 0;
         studentPanel.add(matricNumberLabel, gbc);
@@ -42,27 +48,30 @@ public abstract class AbstractStudentByMatricNumberFrame extends JFrame {
         this.add(studentPanel, CENTER);
 
         matricNumberTextField.addKeyListener(new TextFieldKeyListener(submitButton)); //for ease
-
+        database = new Database();
+        database.connect(this);
         submitButton.addActionListener(actionPerformed -> {
             //validation
-            Object[] objects = new Validator.BlankFieldsValidator().validate(new JTextField[]{matricNumberTextField});
-            var isBlank = (boolean) objects[0];
-            var blankField = (JTextField) objects[1];
+            boolean isBlank = Validator.BlankFieldsExistsValidator(this, new JTextField[]{matricNumberTextField});
             if (isBlank) {
-                JOptionPane.showMessageDialog(this, "Field cannot be blank !!!");
-                blankField.requestFocus(); // Set focus back to the component
-                validationIssues = true;
+                doNotProceed = true;
                 return;
             } else
-                validationIssues = false;
+                doNotProceed = false;
 
-            boolean valid = new Validator.MatricNumberValidator().validate(matricNumberTextField.getText().trim());
+            boolean valid = Validator.matricNumberValidator(this, matricNumberTextField);
             if (!valid) {
-                JOptionPane.showMessageDialog(this, "Matric number is not valid !!!");
-                matricNumberTextField.requestFocus(); // Set focus back to the component
+                doNotProceed = true;
                 return;
             } else
-                validationIssues = false;
+                doNotProceed = false;
+            if (!database.studentExists(matricNumberTextField.getText().trim())) {
+                studentExists = false;
+                Toolkit.getDefaultToolkit().beep();  // Beep to indicate invalid input
+                JOptionPane.showMessageDialog(this, "Student not found !!!");
+                matricNumberTextField.requestFocus(); // Set focus back to the matric number text field
+            } else
+                studentExists = true;
             //end of validation
         });
     }

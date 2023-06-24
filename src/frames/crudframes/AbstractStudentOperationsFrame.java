@@ -1,35 +1,35 @@
 package frames.crudframes;
 
+import database.Database;
+import enums.OperationEnums;
 import frames.ApplicationFrame;
 import frames.ConfirmationFrame;
-import model.StudentDto;
 import validator.Validator;
 
 import javax.swing.*;
 import javax.swing.text.PlainDocument;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static java.awt.BorderLayout.CENTER;
 import static java.awt.BorderLayout.SOUTH;
 import static javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS;
 
-public class AddStudentFrame extends JFrame {
+public abstract class AbstractStudentOperationsFrame extends JFrame {
     private final JLabel firstNameLabel, lastNameLabel, ageLabel, matricNumberLabel, departmentLabel, facultyLabel;
     protected final JButton homeButton, addButton, exitButton, submitButton;
-    private List<JTextField[]> listOfTextFields;
-    protected List<JTextField> matricNumberTextFieldsList;
-    protected boolean validationIssueExists = false;
+    protected boolean doNotProceed;
+    protected Database database;
+    protected List<JTextField[]> listOfTextFields = new ArrayList<>();
     private int rowCount, labelXAxis;
 
     private final JPanel studentPanel;
-    protected ArrayList<StudentDto> firstAndLastNameTextFieldsList;
+//    protected ArrayList<StudentDto> firstAndLastNameTextFieldsList;
 
-    public AddStudentFrame() throws HeadlessException {
-        super("Add Student Details");
+    public AbstractStudentOperationsFrame(String title, OperationEnums operation) throws HeadlessException {
+        super(title);
+
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(850, 500);
         setLocationRelativeTo(null); //centers it
@@ -41,7 +41,6 @@ public class AddStudentFrame extends JFrame {
         }
 
         studentPanel = new JPanel(new GridBagLayout());
-        listOfTextFields = new ArrayList<>();
         rowCount = 1;
 
 
@@ -62,75 +61,57 @@ public class AddStudentFrame extends JFrame {
 
         JScrollPane scrollPane = new JScrollPane(studentPanel);//make the panel scrollable
         scrollPane.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_ALWAYS);
-
+//
         addButton = new JButton("Add");
+        submitButton = new JButton("Submit"); //initialized the submit button to the protected instance variable
+        homeButton = new JButton("Proceed to Home");
+        exitButton = new JButton("Exit application");
+//
+        //listeners
         addButton.addActionListener(actionPerformed -> {
-            var fields = listOfTextFields.get(listOfTextFields.size() - 1);
+            if (doNotProceed)
+                return;
+            var fields = listOfTextFields.get(listOfTextFields.size() - 1); //returns an array of JTextFields
             var firstNameTextField = fields[0];
             var lastNameTextField = fields[1];
             var ageTextField = fields[2];
             var matricNumberTextField = fields[3];
             var departmentTextField = fields[4];
             var facultyTextField = fields[5];
+
             //validate fields
-            Object[] objects = new Validator.BlankFieldsValidator().validate(new JTextField[]{firstNameTextField, lastNameTextField, ageTextField, matricNumberTextField, departmentTextField, facultyTextField});
-            var isBlank = (boolean) objects[0];
-            var blankField = (JTextField) objects[1];
-            if (isBlank) {
-                JOptionPane.showMessageDialog(this, "Field cannot be blank !!!");
-                blankField.requestFocus(); // Set focus back to the component
+            boolean blankFieldExists = Validator.BlankFieldsExistsValidator(this, new JTextField[]{firstNameTextField, lastNameTextField, ageTextField, matricNumberTextField, departmentTextField, facultyTextField});
+            if (blankFieldExists) {
                 return;
             }
-            //check if the matric number of the current field is valid
-            boolean result = new Validator.MatricNumberValidator().validate(matricNumberTextField.getText().trim());
-            if (!result) {
-                JOptionPane.showMessageDialog(matricNumberTextField, "Matric number is in an invalid format!!!");
-                matricNumberTextField.requestFocus(); // Set focus back to the component
+            //check if the matric number of the previous row was valid
+            boolean valid = Validator.matricNumberValidator(this, matricNumberTextField);
+            if (!valid) {
                 return;
             }
             addStudentRow();
             pack(); //to automatically resize...
         });
-
-        homeButton = new JButton("Proceed to Home");
-        exitButton = new JButton("Exit application");
-        //listeners
         homeButton.addActionListener(actionPerformed -> {
             dispose();
             new ApplicationFrame();
         });
-
-        exitButton.addActionListener(actionPerformed -> {
-            dispose();
-        });
-
-        submitButton = new JButton("Submit"); //initialized the submit button to the protected instance variable
-        //this listener performs validation
+        exitButton.addActionListener(actionPerformed -> dispose());
         submitButton.addActionListener(actionPerformed -> {
-            //you still have to implement a button //done
-            boolean fieldIsBlank;
-            AtomicReference<JTextField> blankField = new AtomicReference<>();
-            fieldIsBlank = listOfTextFields.stream().anyMatch(jTextFields -> Arrays
-                    .stream(jTextFields)
-                    .anyMatch(field -> {
-                        if (field.getText().isEmpty() || field.getText().isBlank()) {
-                            blankField.set(field);
-                            return true;
-                        }
-                        return false;
-                    }));
-            if (!validationIssueExists) { //this means a validator was invoked and didn't find any issues...
-                if (fieldIsBlank) { //the blank field validator result
-                    validationIssueExists = true;
-                    JOptionPane.showMessageDialog(this, "Field cannot be blank !!!");
-                    blankField.get().requestFocus(); // Set focus back to the component
-                } else
-                    validationIssueExists = false;
+            if (doNotProceed)
+                return;
+            //check for if a new row was added but wasn't filled
+            boolean blankFieldsExists = Validator.BlankFieldsExistsValidator(this, listOfTextFields);
+            if (blankFieldsExists)
+                return;
+            var matricNumberField = listOfTextFields.get(listOfTextFields.size() - 1)[3];
+            var valid = Validator.matricNumberValidator(this, matricNumberField);
+            //revalidate
+            if (!valid) { //check if the matric number of the previous row was valid
+                return;
             }
-            if (!validationIssueExists) { //this means the matric number validator and blank field validator had no issues...
-                setVisible(false);
-                new ConfirmationFrame(listOfTextFields, this);
-            }
+            setVisible(false);
+            new ConfirmationFrame(listOfTextFields, this, operation);
         });
         //
         JPanel buttonPanel = new JPanel();
@@ -138,16 +119,12 @@ public class AddStudentFrame extends JFrame {
         buttonPanel.add(addButton);
         buttonPanel.add(submitButton);
         buttonPanel.add(exitButton);
-
+        //
         this.add(scrollPane, CENTER);
         this.add(buttonPanel, SOUTH);
         this.setVisible(true);
         pack();
     }
-
-//    public static AddStudentFrame updateStudentFrame() {
-//        return new AddStudentFrame();
-//    }
 
     private void addStudentLabels() {
         GridBagConstraints gbc = new GridBagConstraints();
@@ -182,28 +159,22 @@ public class AddStudentFrame extends JFrame {
         var facultyTextField = new JTextField(20);
 
         //validations
-        //type validation
+        //type validation for the new text fields to be added to the student panel
         ((PlainDocument) firstNameTextField.getDocument())
                 .setDocumentFilter(Validator.textValidator());
         ((PlainDocument) lastNameTextField.getDocument())
                 .setDocumentFilter(Validator.textValidator());
         ((PlainDocument) ageTextField.getDocument())
                 .setDocumentFilter(Validator.numberValidator());
-//        ((PlainDocument) matricNumberTextField.getDocument())
-//                .setDocumentFilter(Validator.matricNumberValidator());
         ((PlainDocument) departmentTextField.getDocument())
                 .setDocumentFilter(Validator.textValidator());
         ((PlainDocument) facultyTextField.getDocument())
                 .setDocumentFilter(Validator.textValidator());
         //
 
-        // this block of code right here is for subclasses
-        //list of matric number textField
-        matricNumberTextFieldsList = new ArrayList<>();
-        matricNumberTextFieldsList.add(matricNumberTextField);
-        //list of first and last name textField
-        firstAndLastNameTextFieldsList = new ArrayList<>();
-        firstAndLastNameTextFieldsList.add(new StudentDto(firstNameTextField, lastNameTextField));
+        //this field is for subclasses to track the text fields...
+        listOfTextFields.add(new JTextField[]{firstNameTextField, lastNameTextField, ageTextField, matricNumberTextField, departmentTextField, facultyTextField});
+
         //
         //alignment
         gbc.gridy = rowCount;
@@ -233,9 +204,7 @@ public class AddStudentFrame extends JFrame {
         gbc.gridx = 5;
         gbc.gridy = rowCount;
         studentPanel.add(facultyTextField, gbc);
-        listOfTextFields.add(new JTextField[]{firstNameTextField, lastNameTextField, ageTextField, matricNumberTextField, departmentTextField, facultyTextField});
         rowCount++;
-
         studentPanel.revalidate();
         studentPanel.repaint();
         this.revalidate();

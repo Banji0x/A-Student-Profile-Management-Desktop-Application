@@ -6,9 +6,9 @@ import java.awt.event.KeyListener;
 
 public class TextFieldKeyListener implements KeyListener {
 
-    private final JButton loginButton;
+    private final AbstractButton loginButton;
 
-    public TextFieldKeyListener(JButton loginButton) {
+    public TextFieldKeyListener(AbstractButton loginButton) {
         this.loginButton = loginButton;
     }
 

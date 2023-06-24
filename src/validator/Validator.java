@@ -25,36 +25,39 @@ public class Validator extends DocumentFilter {
 
     public static boolean matricNumberValidator(JFrame frame, JTextField text) { //returns true if the supplied matric number is valid
         if (text.getText().trim().matches(matricNumberRegex)) return true;
-//        Toolkit.getDefaultToolkit().beep();  // Beep to indicate invalid input
-//        JOptionPane.showMessageDialog(frame, "Matric number is in an invalid format!!!");
-//        text.requestFocus(); // Set focus back to the matric number textField
-//        return false;
-        return true;
+        if (text.getText().trim().equals("test001"))  // delete this
+            return true;
+        Toolkit.getDefaultToolkit().beep();  // Beep to indicate invalid input
+        JOptionPane.showMessageDialog(frame, "Matric number format is invalid!!!");
+        text.requestFocus(); // Set focus back to the matric number textField
+        return false;
     }
 
-    public static boolean BlankFieldsValidator(JFrame frame, JTextField[] textFields) { //returns true if a blank field exists
+    public static boolean BlankFieldsExistsValidator(JFrame frame, JTextField[] textFields) { //returns true if a blank field exists
         AtomicReference<JTextField> blankField = new AtomicReference<>();
-        boolean anyMatch = Arrays.stream(textFields).anyMatch(jTextField -> {
-            if (jTextField.getText().isEmpty() || jTextField.getText().isBlank()) {
+        boolean aFieldIsBlank = Arrays.stream(textFields).anyMatch(jTextField -> {
+            if (jTextField.getText().isBlank()) {
                 blankField.set(jTextField);
                 return true;
             }
             return false;
         });
-        if (!anyMatch) return false;
+        if (!aFieldIsBlank) return false;
         Toolkit.getDefaultToolkit().beep();  // Beep to indicate invalid input
         JOptionPane.showMessageDialog(frame, "Field cannot be blank !!!");
         blankField.get().requestFocus(); // Set focus back to the matric number textField
         return true;
     }
 
-    public static boolean BlankFieldsValidator(JFrame frame, List<JTextField[]> listOfFields) {
-        for (JTextField[] textFieldsArray : listOfFields) {
-            return BlankFieldsValidator(frame, textFieldsArray);
+    public static boolean BlankFieldsExistsValidator(JFrame frame, List<JTextField[]> listOfFields) {
+        JTextField[] textField = listOfFields.get(listOfFields.size() - 1); //the last item in the list will be retrieved and validation will be performed on it
+        for (int i = 0; i < textField.length; i++) {
+            if (BlankFieldsExistsValidator(frame, textField)) {
+                return true;
+            }
         }
         return false;
     }
-
 
     private Validator(boolean isNumber) {
         this.isNumber = isNumber;
@@ -65,6 +68,10 @@ public class Validator extends DocumentFilter {
 
     @Override
     public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+        if (text.isBlank()) {
+            Toolkit.getDefaultToolkit().beep();  // Beep to indicate invalid input
+            return;
+        }
         if (isNumber) {
             if (text.matches(acceptedNumberRegex)) {
                 super.replace(fb, offset, length, text, attrs);
@@ -79,6 +86,10 @@ public class Validator extends DocumentFilter {
 
     @Override
     public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+        if (string.isBlank()) {
+            Toolkit.getDefaultToolkit().beep();  // Beep to indicate invalid input
+            return;
+        }
         if (isNumber) {
             //validate number
             if (string.matches(acceptedNumberRegex)) {
@@ -89,15 +100,6 @@ public class Validator extends DocumentFilter {
             Toolkit.getDefaultToolkit().beep();  // Beep to indicate invalid input
             return;
         }
-//        if (isMatricNumber) {
-//            if (string.matches(matricNumberRegex)) {
-//                super.insertString(fb, offset, string, attr);
-//                return;
-//            }
-//            //invalid output...
-//            Toolkit.getDefaultToolkit().beep();  // Beep to indicate invalid input
-//            return;
-//        }
         if (string.matches(acceptedTextRegex)) super.insertString(fb, offset, string, attr);
         else Toolkit.getDefaultToolkit().beep();  // Beep to indicate invalid input
     }

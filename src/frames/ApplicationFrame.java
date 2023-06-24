@@ -1,9 +1,6 @@
 package frames;
 
-import frames.crudframes.AbstractDeleteStudentFrame;
-import frames.crudframes.AddStudentFrame;
-import frames.crudframes.GetStudentFrame;
-import frames.crudframes.UpdateStudentFrame;
+import frames.crudframes.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,7 +27,7 @@ public class ApplicationFrame extends JFrame {
         var addButton = new JButton("Add Student");
         addButton.addActionListener(actionEvent -> {
             dispose();
-            new AddStudentFrame();
+            new PostStudentFrame();
         });
 
         var getAllButton = new JButton("Fetch Student");
@@ -39,13 +36,13 @@ public class ApplicationFrame extends JFrame {
             int optionPicked = JOptionPane.showOptionDialog(this, "Please select an option", "Option Dialog", DEFAULT_OPTION, PLAIN_MESSAGE, null, options, null);
             if (optionPicked == 0) {
                 dispose();
-                new GetStudentFrame.FetchStudentByNameFrame();
+                new AbstractGetStudentFrame.FetchStudentByFirstAndLastNameFrame();
             } else if (optionPicked == 1) {
                 dispose();
-                new GetStudentFrame.FetchStudentByMatricFrame();
+                new AbstractGetStudentFrame.FetchStudentByMatricNumberFrame();
             } else if (optionPicked == 2) {
                 dispose();
-                GetStudentFrame.FetchAllStudents();
+                new AbstractGetStudentFrame.GetAllStudentDetailsFrame();
             }
         });
 
@@ -65,7 +62,7 @@ public class ApplicationFrame extends JFrame {
         var deleteButton = new JButton("Delete Student");
         deleteButton.addActionListener(actionEvent -> {
             //delete functionality
-            String[] options = {"Delete by matric number", "Delete by first name and last name"};
+            String[] options = {"Delete by first name and last name", "Delete by matric number"};
             int optionPicked = JOptionPane.showOptionDialog(this, "Please select an option", "Delete Option Dialog", DEFAULT_OPTION, PLAIN_MESSAGE, null, options, null);
             if (optionPicked == 0) {
                 dispose();

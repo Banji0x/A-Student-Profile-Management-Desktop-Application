@@ -1,95 +1,77 @@
 package frames.crudframes;
 
 import database.Database;
-import model.StudentDto;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
-public abstract class UpdateStudentFrame extends AddStudentFrame {
+import static enums.OperationEnums.UPDATE;
+
+public abstract class UpdateStudentFrame extends AbstractStudentOperationsFrame {
     protected Database database;
-    private static String title = "Update Student Details";
 
     public UpdateStudentFrame(String title) throws HeadlessException {
-        super.setTitle(title);
+        super(title, UPDATE);
         database = new Database();
-        database.connect();
+        database.connect(this);
     }
-
 
     public static class UpdateStudentFrameByMatricNumber extends UpdateStudentFrame {
         public UpdateStudentFrameByMatricNumber() {
-            super(title);
-            var listOfMatricNumber = listOfMatricNumber();
-
-            AtomicReference<JTextField> textField = new AtomicReference<>();
-
-            submitButton.addActionListener(actionPerformed -> {
-                boolean found = listOfMatricNumber.stream().anyMatch(matricNumberTextField -> {
-                    var exists = matricNumberExists(matricNumberTextField.getText().trim());
-                    textField.set(matricNumberTextField);
-                    return exists;
-                });
-                if (!found) {
-                    validationIssueExists = true;  //this prevents the other action listener from proceeding to the next page.
-                    JOptionPane.showMessageDialog(this, "Matric number not found!!!");
-                    textField.get().requestFocus(); // Set focus back to the component
-                    return;
-                }
-                validationIssueExists = false;
-            });
+            super("Update Student Details By Matric Number");
+            addButton.addActionListener(actionPerformed -> validateMatricNumber());
+            submitButton.addActionListener(actionPerformed -> validateMatricNumber());
         }
 
-        private List<JTextField> listOfMatricNumber() {
-            return this.matricNumberTextFieldsList;
-        }
-
-        private boolean matricNumberExists(String matricNumber) {
+        private boolean studentExists(JTextField matricNumberTextField) {
             //call db to check if it exists
-            return database.studentExists(matricNumber.trim());
+            return database.studentExists(matricNumberTextField.getText().trim());
+        }
+
+        private void validateMatricNumber() {
+            JTextField[] textFields = listOfTextFields.get(listOfTextFields.size() - 1);
+            JTextField matricNumberTextField = textFields[3];
+            boolean studentExists = studentExists(matricNumberTextField);
+            doNotProceed = !studentExists; //this makes the listener in the parent class to proceed or not
+            if (!doNotProceed)
+                return;
+            String message = "Student doesn't exist !!!";
+            if (!matricNumberTextField.getText().isBlank())
+                message = matricNumberTextField.getText().trim() + " is not a student.";
+            Toolkit.getDefaultToolkit().beep();  // Beep to indicate invalid input
+            JOptionPane.showMessageDialog(this, message);
+            matricNumberTextField.requestFocus(); // Set focus back to the matricNumber textField
         }
     }
 
     public static class UpdateStudentFrameByFullName extends UpdateStudentFrame {
 
         public UpdateStudentFrameByFullName() throws HeadlessException {
-            super(title);
-            List<JTextField> namesTextField = new ArrayList<>();
-            submitButton.addActionListener(actionPerformed -> {
-                List<StudentDto> namesList = listOfStudentFirstAndLastName();
-                boolean studentFound = namesList.stream().anyMatch(nameDto -> {
-                    var firstName = nameDto.firstNameTextField().getText().trim();
-                    var lastName = nameDto.lastNameTextField().getText().trim();
-                    boolean studentExists = studentExists(firstName, lastName);
-                    if (!studentExists) {
-                        namesTextField.add(nameDto.firstNameTextField());
-                        namesTextField.add(nameDto.lastNameTextField());
-                    }
-                    return studentExists;
-                });
-                if (!studentFound) {
-                    validationIssueExists = true;  //this prevents the other action listener from proceeding to the next page.
-                    if (namesList.get(0).firstNameTextField().getText().trim().equals("") || namesList.get(0).lastNameTextField().getText().equals("")) {
-                        //do nothing
-                        //ignore
-                    } else {
-                        JOptionPane.showMessageDialog(this, namesTextField.get(0).getText().trim() + " " + namesTextField.get(1).getText().trim() + " is not a student.");
-                        namesTextField.get(0).requestFocus(); // Set focus back to the first name component
-                    }
-                } else
-                    validationIssueExists = false;
-            });
+            super("Update Student Details By FullName");
+            addButton.addActionListener(actionPerformed -> validateFirstAndLastNameFields());
+
+            submitButton.addActionListener(actionPerformed -> validateFirstAndLastNameFields());
         }
 
-        private boolean studentExists(String firstName, String lastName) {
-            return database.studentExists(firstName, lastName);
+        private boolean studentExists(JTextField firstNameTextField, JTextField lastNameTextField) {
+            return database.studentExists(firstNameTextField.getText().trim(), lastNameTextField.getText().trim());
         }
 
-        private List<StudentDto> listOfStudentFirstAndLastName() {
-            return this.firstAndLastNameTextFieldsList;
+        private void validateFirstAndLastNameFields() {
+            JTextField[] textFields = listOfTextFields.get(listOfTextFields.size() - 1);
+            JTextField firstNameTextField = textFields[0];
+            JTextField lastNameTextField = textFields[1];
+            boolean studentExists = studentExists(firstNameTextField, lastNameTextField);
+            //doNotProceed decides whether the other listener will be invoked or not
+            doNotProceed = !studentExists;
+            if (!doNotProceed)
+                return;
+            String message = "Student doesn't exist !!!";
+            if (!firstNameTextField.getText().isBlank() && !lastNameTextField.getText().isBlank())
+                message = firstNameTextField.getText().trim() + " " + lastNameTextField.getText().trim() + " is not a student.";
+            Toolkit.getDefaultToolkit().beep();  // Beep to indicate invalid input
+            JOptionPane.showMessageDialog(this, message);
+            firstNameTextField.requestFocus(); // Set focus back to the firstName textField
         }
     }
 }

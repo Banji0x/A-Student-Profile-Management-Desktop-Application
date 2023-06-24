@@ -1,13 +1,15 @@
 package frames;
 
 import database.Database;
-import frames.crudframes.AddStudentFrame;
+import enums.OperationEnums;
+import frames.crudframes.AbstractStudentOperationsFrame;
 import model.Student;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
+import static enums.OperationEnums.*;
 import static javax.swing.JOptionPane.DEFAULT_OPTION;
 import static javax.swing.JOptionPane.PLAIN_MESSAGE;
 
@@ -16,7 +18,7 @@ public class ConfirmationFrame extends JFrame {
     protected JTable outputTable;
     private Database database;
 
-    public ConfirmationFrame(List<JTextField[]> list, AddStudentFrame studentFrame) throws HeadlessException {
+    public ConfirmationFrame(List<JTextField[]> list, AbstractStudentOperationsFrame studentFrame, OperationEnums operationEnum) throws HeadlessException {
         super("Confirmation Page");
         database = new Database();
         setSize(550, 400);
@@ -27,7 +29,6 @@ public class ConfirmationFrame extends JFrame {
         } catch (Exception exception) {
             exception.printStackTrace();
         }
-        database.connect();
         JPanel confirmationPanel = new JPanel(new BorderLayout());
 
         outputTable = createTable(list);
@@ -38,17 +39,22 @@ public class ConfirmationFrame extends JFrame {
 
         JButton proceedButton = new JButton("Proceed");
         proceedButton.addActionListener(e -> {
-            boolean connected = database.isConnected();
-            if (!connected) {
-                JOptionPane.showMessageDialog(this, "There's a problem with your network connection.");
-                return;
+            database.connect(this);
+            List<Student> studentList = list
+                    .stream()
+                    .map(textFieldArray -> new Student(textFieldArray[0].getText().trim(), textFieldArray[1].getText().trim(), textFieldArray[2].getText().trim(), textFieldArray[3].getText().trim(), textFieldArray[4].getText().trim(), textFieldArray[5].getText().trim()))
+                    .toList();
+
+            boolean success = false;
+            if (operationEnum.equals(POST)) {
+                success = database.saveAll(studentList);
+            } else if (operationEnum.equals(UPDATE)) {
+                success = database.updateAll(studentList);
+            } else if (operationEnum.equals(DELETE)) {
+                success = database.deleteALl(studentList);
             }
-
-            List<Student> studentList = list.stream().map(textFieldArray -> new Student(textFieldArray[0].getText().trim(), textFieldArray[1].getText().trim(), textFieldArray[2].getText().trim(), textFieldArray[3].getText().trim(), textFieldArray[4].getText().trim(), textFieldArray[5].getText().trim())).toList();
-
-            boolean success = database.saveAll(studentList);
             if (!success) {
-                JOptionPane.showMessageDialog(this, "An error occurred while persisting to database.Kindly try again");
+                JOptionPane.showMessageDialog(this, "An error occurred while persisting to database.Kindly try again at a later time");
                 return;
             }
             studentFrame.dispose();
@@ -93,12 +99,12 @@ public class ConfirmationFrame extends JFrame {
         return table;
     }
 
-    public JTable getOutputTable() {
-        return outputTable;
-    }
+//    public JTable getOutputTable() {
+//        return outputTable;
+//    }
 
-    public void setOutputTable(JTable outputTable) {
-        this.outputTable = outputTable;
-    }
+//    public void setOutputTable(JTable outputTable) {
+//        this.outputTable = outputTable;
+//    }
 }
 
